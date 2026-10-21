@@ -2,7 +2,7 @@
 
 **A spreadsheet that runs in the browser, built from scratch.** No spreadsheet or grid library: the virtualized grid, the formula parser, the evaluator and the recalculation engine are all hand-written in TypeScript.
 
-Built by [Lovjyot Singh](https://lovjyotsingh.github.io).
+**Live:** [gridline-pearl.vercel.app](https://gridline-pearl.vercel.app) · Built by [Lovjyot Singh](https://lovjyotsingh.github.io)
 
 ## What you can do
 
