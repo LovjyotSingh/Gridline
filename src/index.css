@@ -1,0 +1,90 @@
+:root {
+  --bg: #000; --s1: #0A0A0B; --s2: #111113; --s3: #18181B;
+  --line: rgba(255, 255, 255, .08); --line2: rgba(255, 255, 255, .14);
+  --ink: #F5F5F7; --muted: #A1A1AA; --dim: #66666E;
+  --c1: #FF8A3D; --c2: #FF3D81; --c3: #8B5CFF; --c4: #3D8BFF; --ok: #34D399;
+  --grad: linear-gradient(90deg, var(--c1), var(--c2) 50%, var(--c3));
+  --sans: "Geist", "Segoe UI", system-ui, sans-serif;
+  --mono: "Geist Mono", ui-monospace, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box }
+html, body, #root { height: 100% }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.5 var(--sans); -webkit-font-smoothing: antialiased; overflow: hidden }
+button { font: inherit; color: inherit }
+:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px }
+
+.app { height: 100dvh; display: flex; flex-direction: column; position: relative }
+
+/* header */
+.top { display: flex; align-items: center; gap: 16px; padding: 10px 14px; border-bottom: 1px solid var(--line); min-width: 0 }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; flex: none }
+.brand svg { width: 28px; height: 28px; flex: none }
+.brand span { display: flex; flex-direction: column; line-height: 1.2 }
+.brand b { font-weight: 600; font-size: 15.5px; letter-spacing: -.02em }
+.brand small { font-size: 12px; color: var(--dim) }
+.tools { display: flex; gap: 6px; margin-left: auto; overflow-x: auto; scrollbar-width: none; min-width: 0; padding: 2px }
+.tools::-webkit-scrollbar { display: none }
+.btn { font: 500 13px var(--sans); padding: 7px 13px; border-radius: 999px; border: 1px solid var(--line2); background: transparent; color: var(--muted); white-space: nowrap; cursor: pointer; transition: color .2s, background .2s, border-color .2s }
+.btn:hover { color: var(--ink); background: rgba(255, 255, 255, .05) }
+.btn.on { color: #000; background: var(--ink); border-color: var(--ink) }
+@media (max-width: 760px) {
+  .brand small { display: none }
+  .tools { -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent); padding-right: 28px }
+}
+
+/* formula bar */
+.fbar { display: flex; align-items: center; height: 40px; border-bottom: 1px solid var(--line); background: var(--s1) }
+.namebox { flex: none; min-width: 84px; max-width: 140px; height: 100%; display: flex; align-items: center; padding: 0 12px; border-right: 1px solid var(--line); font: 500 12.5px var(--mono); color: var(--muted); overflow: hidden; white-space: nowrap }
+.fx { flex: none; padding: 0 10px; font: italic 600 13px var(--mono); background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent }
+.fbar input { flex: 1; min-width: 0; height: 100%; border: 0; background: transparent; color: var(--ink); font: 13.5px var(--mono); padding: 0 12px 0 0; outline: none }
+
+/* grid */
+.scroller { position: relative; flex: 1; min-height: 0; overflow: auto; outline: none; overscroll-behavior: contain; background: var(--bg) }
+.scroller:focus-visible { outline: none; box-shadow: inset 0 0 0 1px rgba(255, 138, 61, .35) }
+.sizer { position: relative }
+.colhead { position: sticky; top: 0; z-index: 3; height: 30px; background: var(--s1); border-bottom: 1px solid var(--line2) }
+.corner { position: sticky; left: 0; z-index: 1; display: block; width: 52px; height: 30px; padding: 0; border: 0; border-right: 1px solid var(--line2); background: var(--s1); cursor: pointer }
+.ch { position: absolute; top: 0; height: 30px; display: grid; place-items: center; font: 500 11.5px var(--mono); color: var(--dim); border-right: 1px solid var(--line); cursor: pointer; user-select: none }
+.rowhead { position: sticky; left: 0; z-index: 2; width: 52px; background: var(--s1); border-right: 1px solid var(--line2) }
+.rh { position: absolute; left: 0; width: 100%; height: 30px; display: grid; place-items: center; font: 500 11px var(--mono); color: var(--dim); border-bottom: 1px solid var(--line); cursor: pointer; user-select: none }
+.ch.on, .rh.on { color: var(--ink); background: rgba(255, 138, 61, .1) }
+.body {
+  position: absolute; top: 30px; left: 52px; z-index: 1; user-select: none; -webkit-user-select: none; cursor: cell;
+  background-image: linear-gradient(to right, var(--line) 1px, transparent 1px), linear-gradient(to bottom, var(--line) 1px, transparent 1px);
+  background-position: -1px -1px;
+}
+.cell { position: absolute; height: 30px; padding: 0 9px; line-height: 30px; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none }
+.cell.num { text-align: right; font-variant-numeric: tabular-nums }
+.cell.bool { text-align: center; font: 500 12px/30px var(--mono); color: var(--c3) }
+.cell.err { text-align: center; font: 500 12px/30px var(--mono); color: var(--c2) }
+.range { position: absolute; pointer-events: none; background: rgba(255, 138, 61, .08); border: 1px solid rgba(255, 138, 61, .55) }
+.active { position: absolute; pointer-events: none; border: 2px solid var(--c1); border-radius: 2px; box-shadow: 0 0 0 1px rgba(0, 0, 0, .7), 0 0 18px -4px rgba(255, 138, 61, .55) }
+.refbox { position: absolute; pointer-events: none; border: 1.5px dashed var(--rc); background: color-mix(in srgb, var(--rc) 9%, transparent) }
+.editor { position: absolute; z-index: 5 }
+.editor input { display: block; width: 100%; height: 100%; margin: 0; padding: 0 8px; border: 2px solid var(--c1); border-radius: 2px; background: var(--s2); color: var(--ink); font: 13.5px var(--mono); outline: none; box-shadow: 0 10px 30px rgba(0, 0, 0, .7) }
+
+/* status bar */
+.status { display: flex; justify-content: space-between; gap: 6px 20px; flex-wrap: wrap; padding: 8px 14px calc(8px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--line); background: var(--s1); font: 500 12px var(--mono); color: var(--muted) }
+.status b { color: var(--ink); font-weight: 500 }
+.status .right { color: var(--dim) }
+.status .right b { color: var(--muted) }
+
+/* help panel */
+.help { position: absolute; top: 58px; right: 14px; z-index: 20; width: min(420px, calc(100% - 28px)); max-height: calc(100% - 76px); overflow: auto; padding: 20px 22px; border: 1px solid var(--line2); border-radius: 18px; background: var(--s1); box-shadow: 0 30px 80px -20px rgba(0, 0, 0, .9); font-size: 14px; color: var(--muted) }
+.help h2 { margin: 0 0 10px; font-size: 18px; letter-spacing: -.02em; color: var(--ink) }
+.help h3 { margin: 18px 0 8px; font: 500 11px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--dim) }
+.help p { margin: 0 0 10px }
+.help b { color: var(--ink); font-weight: 500 }
+.help ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px }
+.help code, .help kbd { font: 12px var(--mono); padding: 1px 6px; border-radius: 5px; border: 1px solid var(--line2); background: var(--s2); color: var(--ink) }
+.help .fns { font: 12.5px/1.8 var(--mono) }
+.help .by { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 13px }
+.help .by a { color: var(--ink) }
+.help .close { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line2); background: transparent; color: var(--muted); font-size: 18px; line-height: 1; cursor: pointer }
+
+@media (pointer: coarse) {
+  .btn { padding: 10px 15px }
+  .fbar input { font-size: 16px }
+  .editor input { font-size: 16px }
+}
