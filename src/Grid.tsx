@@ -55,6 +55,10 @@ export function Grid(p: Props) {
   const c0 = Math.max(0, Math.floor(view.left / colW) - 1)
   const c1 = Math.min(COLS - 1, Math.ceil((view.left + view.w) / colW) + 1)
 
+  // cells the last edit recalculated flash briefly, so you can watch the dependency graph work
+  const recent = sheet.lastRecalc
+  const flashing = recent.keys.size <= 500 && performance.now() - recent.at < 900
+
   const cells: ReactNode[] = []
   for (let r = r0; r <= r1; r++) {
     for (let c = c0; c <= c1; c++) {
@@ -64,8 +68,12 @@ export function Grid(p: Props) {
       // text runs on into empty cells to its right, like in Sheets
       let spill = 0
       if (kind === 'text') while (spill < 8 && c + spill + 1 < COLS && !sheet.raw(r, c + spill + 1)) spill++
+      const k = r * COLS + c, flash = flashing && recent.keys.has(k)
       cells.push(
-        <div key={r * COLS + c} className={`cell ${kind}`} style={{ top: r * ROW_H, left: c * colW, width: colW * (spill + 1) }}>
+        <div
+          key={flash ? `${k}@${recent.at}` : k} className={`cell ${kind}${flash ? ' flash' : ''}`}
+          style={{ top: r * ROW_H, left: c * colW, width: colW * (spill + 1) }}
+        >
           {display(v)}
         </div>
       )

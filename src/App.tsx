@@ -12,6 +12,8 @@ interface Step { before: Edit[]; after: Edit[] }
 interface Clip { text: string; raws: string[][]; r: number; c: number; cut: boolean }
 
 const STORE = 'gridline:v1'
+// ?embed is the portfolio's inline demo: a fresh sample each time, nothing saved, no focus stealing
+const EMBED = new URLSearchParams(location.search).has('embed')
 const ARROWS: Record<string, [number, number]> = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] }
 const clampR = (r: number) => Math.max(0, Math.min(ROWS - 1, r))
 const clampC = (c: number) => Math.max(0, Math.min(COLS - 1, c))
@@ -20,10 +22,11 @@ function loadSheet() {
   const s = new Sheet()
   let saved: Edit[] | null = null
   try {
-    const json = localStorage.getItem(STORE)
+    const json = EMBED ? null : localStorage.getItem(STORE)
     if (json) saved = (JSON.parse(json) as Array<[number, number, string]>).map(([r, c, raw]) => ({ r, c, raw }))
   } catch { /* private mode or bad data: start from the sample */ }
   s.set(saved ?? sampleEdits())
+  s.lastRecalc.keys = new Set() // no flash for the first load
   return s
 }
 
@@ -43,7 +46,7 @@ export default function App() {
   const [version, bump] = useReducer((x: number) => x + 1, 0)
   const [sel, setSel] = useState<Sel>({ r: 1, c: 4, er: 1, ec: 4 })
   const [edit, setEdit] = useState<EditState | null>(null)
-  const [notice, setNotice] = useState('')
+  const [notice, setNotice] = useState(EMBED ? 'Change a month or the target in B10, and watch which cells recalculate.' : '')
   const [help, setHelp] = useState(false)
   const colW = useNarrow() ? 96 : 116
 
@@ -77,6 +80,7 @@ export default function App() {
     if (!after.length) return
     const before = after.map(e => ({ r: e.r, c: e.c, raw: sheet.raw(e.r, e.c) }))
     sheet.set(after)
+    setNotice('')
     const h = history.current
     h.undo.push({ before, after })
     if (h.undo.length > 200) h.undo.shift()
@@ -96,6 +100,7 @@ export default function App() {
   }
 
   useEffect(() => {
+    if (EMBED) return
     const t = setTimeout(() => {
       try { localStorage.setItem(STORE, JSON.stringify(sheet.entries().map(e => [e.r, e.c, e.raw]))) } catch { /* storage full or blocked */ }
     }, 400)
@@ -388,7 +393,7 @@ export default function App() {
     return () => removeEventListener('keydown', close)
   }, [help])
 
-  useEffect(() => { focusGrid() }, [])
+  useEffect(() => { if (!EMBED) focusGrid() }, [])
 
   /* ---------- derived view ---------- */
 
@@ -422,9 +427,12 @@ export default function App() {
   )
 
   return (
-    <div className="app">
+    <div className={EMBED ? 'app embed' : 'app'}>
       <header className="top">
-        <a className="brand" href="https://lovjyotsingh.github.io" target="_blank" rel="noopener" title="Built by Lovjyot Singh">
+        <a
+          className="brand" href={EMBED ? '/' : 'https://lovjyotsingh.github.io'} target="_blank" rel="noopener"
+          title={EMBED ? 'Open the full app' : 'Built by Lovjyot Singh'}
+        >
           <svg viewBox="0 0 32 32" aria-hidden="true">
             <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#FF8A3D" /><stop offset=".5" stopColor="#FF3D81" /><stop offset="1" stopColor="#8B5CFF" /></linearGradient></defs>
             <rect x="1" y="1" width="30" height="30" rx="8" fill="#0A0A0B" stroke="url(#lg)" strokeWidth="2" />
@@ -436,12 +444,15 @@ export default function App() {
         <nav className="tools" aria-label="Sheet actions">
           <button className="btn" onClick={loadSample}>Sample</button>
           <button className="btn" onClick={loadStress}>Add 10,000 rows</button>
-          <button className="btn" onClick={() => fileInput.current?.click()}>Import CSV</button>
-          <button className="btn" onClick={exportCsv}>Export CSV</button>
-          <button className="btn" onClick={() => { commit(clearAll()); notify('Cleared. Undo brings it back.') }}>Clear</button>
+          {!EMBED && <>
+            <button className="btn" onClick={() => fileInput.current?.click()}>Import CSV</button>
+            <button className="btn" onClick={exportCsv}>Export CSV</button>
+            <button className="btn" onClick={() => { commit(clearAll()); notify('Cleared. Undo brings it back.') }}>Clear</button>
+          </>}
           <button className="btn" onClick={() => travel(true)} aria-label="Undo" title="Undo (Ctrl+Z)">↶</button>
           <button className="btn" onClick={() => travel(false)} aria-label="Redo" title="Redo (Ctrl+Y)">↷</button>
           <button className={'btn' + (help ? ' on' : '')} onClick={() => setHelp(h => !h)} aria-expanded={help} aria-controls="help">How it works</button>
+          {EMBED && <a className="btn" href="/" target="_blank" rel="noopener">Open full app ↗</a>}
         </nav>
         <input ref={fileInput} type="file" accept=".csv,text/csv" hidden onChange={e => { const f = e.target.files?.[0]; if (f) importCsv(f); e.target.value = '' }} />
       </header>

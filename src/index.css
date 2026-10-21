@@ -25,7 +25,7 @@ button { font: inherit; color: inherit }
 .brand small { font-size: 12px; color: var(--dim) }
 .tools { display: flex; gap: 6px; margin-left: auto; overflow-x: auto; scrollbar-width: none; min-width: 0; padding: 2px }
 .tools::-webkit-scrollbar { display: none }
-.btn { font: 500 13px var(--sans); padding: 7px 13px; border-radius: 999px; border: 1px solid var(--line2); background: transparent; color: var(--muted); white-space: nowrap; cursor: pointer; transition: color .2s, background .2s, border-color .2s }
+.btn { font: 500 13px var(--sans); text-decoration: none; padding: 7px 13px; border-radius: 999px; border: 1px solid var(--line2); background: transparent; color: var(--muted); white-space: nowrap; cursor: pointer; transition: color .2s, background .2s, border-color .2s }
 .btn:hover { color: var(--ink); background: rgba(255, 255, 255, .05) }
 .btn.on { color: #000; background: var(--ink); border-color: var(--ink) }
 @media (max-width: 760px) {
@@ -58,6 +58,10 @@ button { font: inherit; color: inherit }
 .cell.num { text-align: right; font-variant-numeric: tabular-nums }
 .cell.bool { text-align: center; font: 500 12px/30px var(--mono); color: var(--c3) }
 .cell.err { text-align: center; font: 500 12px/30px var(--mono); color: var(--c2) }
+.cell.flash { animation: recalc 1s ease-out }
+@keyframes recalc { from { background: rgba(255, 138, 61, .32); box-shadow: inset 0 0 0 1px rgba(255, 138, 61, .6) } to { background: transparent; box-shadow: inset 0 0 0 1px transparent } }
+@media (prefers-reduced-motion: reduce) { .cell.flash { animation: none } }
+.app.embed .scroller { overscroll-behavior: auto }
 .range { position: absolute; pointer-events: none; background: rgba(255, 138, 61, .08); border: 1px solid rgba(255, 138, 61, .55) }
 .active { position: absolute; pointer-events: none; border: 2px solid var(--c1); border-radius: 2px; box-shadow: 0 0 0 1px rgba(0, 0, 0, .7), 0 0 18px -4px rgba(255, 138, 61, .55) }
 .refbox { position: absolute; pointer-events: none; border: 1.5px dashed var(--rc); background: color-mix(in srgb, var(--rc) 9%, transparent) }

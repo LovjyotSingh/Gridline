@@ -16,7 +16,7 @@ export class Sheet {
   private deps = new Map<number, number[]>() // cells this cell reads
   private rdeps = new Map<number, Set<number>>() // cells that read this cell
   private vals = new Map<number, Value>()
-  lastRecalc = { cells: 0, ms: 0 }
+  lastRecalc = { cells: 0, ms: 0, at: 0, keys: new Set<number>() }
 
   raw(r: number, c: number) { return this.raws.get(key(r, c)) ?? '' }
   value(r: number, c: number): Value { return this.vals.get(key(r, c)) ?? null }
@@ -83,7 +83,8 @@ export class Sheet {
       }
     }
     for (const [k, n] of waiting) if (n > 0) this.vals.set(k, { err: '#CYCLE!' })
-    this.lastRecalc = { cells: affected.size, ms: performance.now() - t0 }
+    const now = performance.now()
+    this.lastRecalc = { cells: affected.size, ms: now - t0, at: now, keys: affected }
   }
 
   private compute(k: number) {
